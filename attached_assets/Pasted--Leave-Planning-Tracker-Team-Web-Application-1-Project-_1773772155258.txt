@@ -1,0 +1,529 @@
+# Leave Planning Tracker – Team Web Application
+
+## 1. Project Overview
+
+The Leave Planning Tracker is a web application designed for internal team use to manage and visualize planned leaves. The system allows team members to plan their leaves in advance while enabling the admin to manage users and ensure proper team coverage.
+
+The application will provide:
+- Leave planning and tracking
+- A shared team leave calendar
+- User management by admin
+- A modern, visually appealing UI with vibrant colors and smooth animations
+
+The UI should feel modern, clean, and engaging so that team members enjoy using it regularly.
+
+---
+
+# 2. Technology Stack
+
+## Frontend
+Next.js (React Framework)
+Tailwind CSS
+Framer Motion (for cinematic animations)
+FullCalendar (team calendar view)
+ShadCN UI or Material UI components
+
+## Backend / Database
+Supabase (PostgreSQL + Authentication)
+
+## Deployment
+Frontend: Vercel
+Backend: Supabase Cloud
+
+---
+
+# 3. User Roles
+
+## Admin
+
+Admin has full access to the system.
+
+Admin capabilities:
+
+- Add team members{Name, Email}
+- Remove team members
+- Assign default passwords
+- View all planned leaves
+- Access admin dashboard
+•	Add Member form: full name, email address, role, default password. Supabase Auth creates the user; the profile row is inserted automatically via a database trigger.
+
+---
+
+## User
+
+Team members who plan their leaves.
+
+User capabilities:
+
+- Login to the application
+- Change password
+- Add leave plans
+- Edit leave plans
+- Delete leave plans
+- View team leave calendar
+•	Provide a shared monthly calendar showing all planned leaves at a glance.
+
+---
+
+# 4. Application Modules
+
+## 4.1 Authentication Module
+
+Features:
+
+Login Page
+- Email input
+- Password input
+- Login button
+- Forgot password option
+
+Profile Section
+Users can:
+- Change password
+- Update name
+- View their email
+
+Admin will create users and provide default passwords.
+
+Users must change their password after first login.
+
+---
+
+# 4.2 Admin Management Module
+
+Admin dashboard includes:
+
+Add Member
+Fields required:
+
+Name
+Email
+Default Password
+Role (Admin/User)
+
+Example:
+
+Name: Rahul
+Email: rahul@company.com
+Password: Welcome@123
+Role: User
+
+---
+
+Remove Member
+
+Admin can remove users or deactivate accounts.
+
+---
+
+View Members
+
+Admin can see list of team members.
+
+Columns:
+
+Name
+Email
+Role
+Created Date
+Actions
+
+---
+
+# 4.3 Leave Planning Module
+
+Users can manage their planned leaves.
+
+Fields:
+
+Leave ID
+User ID
+Start Date
+End Date
+Reason
+Created Date
+
+Example:
+
+Start Date: 2026-05-10
+End Date: 2026-05-12
+Reason: Personal
+
+---
+
+User Features:
+
+Add Leave
+Edit Leave
+Delete Leave
+View their leave history
+
+---
+
+# 4.4 Team Leave Calendar
+
+This module allows the team to see everyone's planned leaves.
+
+Calendar Features:
+
+Monthly View
+Weekly View
+Daily View
+
+Each leave event displays:
+
+User Name
+Leave Dates
+Leave Reason
+
+Example:
+
+May 12
+Rahul – Leave
+
+May 15
+Muralidhar – Leave
+
+Calendar should highlight leave days using colored tags.
+
+---
+
+# 5. Database Design
+
+Database: PostgreSQL (Supabase)
+
+---
+
+## Table: users
+
+Columns:
+
+id (uuid)
+name (text)
+email (text)
+role (text)
+created_at (timestamp)
+
+---
+
+## Table: leaves
+
+Columns:
+
+id (uuid)
+user_id (uuid)
+start_date (date)
+end_date (date)
+reason (text)
+created_at (timestamp)
+
+---
+
+Relationship:
+
+users.id → leaves.user_id
+
+---
+
+# 6. UI Design Requirements
+
+The UI must look modern and impressive.
+
+Design Goals:
+
+- Cinematic appearance
+- Smooth animations
+- Vibrant colors
+- Clean layout
+- Mobile responsive
+
+---
+
+## UI Theme
+
+Use a modern gradient theme.
+
+Example color palette:
+
+Primary: Indigo / Purple
+Secondary: Cyan / Blue
+Accent: Orange / Pink
+
+Example gradient backgrounds:
+
+Purple → Blue
+Blue → Cyan
+Indigo → Pink
+
+Cards should have:
+
+- Soft shadows
+- Rounded corners
+- Hover animations
+- Gradient headers
+
+---
+
+## Dashboard UI
+
+The dashboard should display:
+
+- Total team members
+- Leaves today
+- Upcoming leaves
+- Monthly leave count
+
+Use colorful cards for each metric.
+
+Example:
+
+Card 1: Team Members
+Card 2: Leaves Today
+Card 3: Upcoming Leaves
+Card 4: Planned Leaves
+
+Cards should animate on hover.
+
+---
+
+## Leave Management Page
+
+Display leaves in a modern table.
+
+Columns:
+
+Start Date
+End Date
+Reason
+Actions
+
+Buttons:
+
+Edit
+Delete
+
+Use colored buttons:
+
+Edit → Blue
+Delete → Red
+
+---
+
+## Calendar Page
+
+Use FullCalendar with a modern theme.
+
+Calendar features:
+
+Color-coded leave events
+Hover tooltips
+Clickable events
+
+Example color coding:
+
+User 1 → Blue
+User 2 → Green
+User 3 → Purple
+
+---
+
+## Admin Page
+
+Admin panel should show:
+
+Team Members Table
+
+Columns:
+
+Name
+Email
+Role
+Action
+
+Buttons:
+
+Add Member
+Remove Member
+
+Add Member should open a modern modal form.
+
+---
+
+## Profile Page
+
+User can:
+
+Change password
+Update name
+
+Display user avatar and profile card.
+
+---
+
+# 7. Security
+
+Row Level Security must be enabled in Supabase.
+
+Rules:
+
+Users can:
+- View their leaves
+- Edit their leaves
+- Delete their leaves
+
+Users cannot modify other users' data.
+
+Admin can:
+
+- View all leaves
+- Manage users
+
+---
+
+# 8. Folder Structure
+
+Example project structure:
+
+leave-tracker
+
+src
+components
+layout
+navbar
+sidebar
+cards
+
+pages
+login
+dashboard
+leaves
+calendar
+admin
+profile
+
+services
+supabaseClient.js
+
+utils
+
+styles
+
+---
+
+# 9. Development Steps
+
+Step 1
+Create Supabase project
+
+Step 2
+Create database tables:
+users
+leaves
+
+Step 3
+Enable Supabase authentication
+
+Step 4
+Develop frontend pages
+
+Step 5
+Connect API with Supabase
+
+Step 6
+Implement calendar view
+
+Step 7
+Deploy frontend on Vercel
+
+---
+
+# 10. UI Enhancement Features
+
+Add these for better experience:
+
+Animated buttons
+Hover effects
+Dark mode
+Gradient backgrounds
+Smooth page transitions
+Loading skeletons
+
+Use Framer Motion for animations.
+
+---
+
+# 11. Future Improvements
+
+Possible enhancements:
+
+Leave approval workflow
+Email notifications
+Holiday calendar integration
+Slack notifications
+Conflict detection for overlapping leaves
+Analytics dashboard
+Mobile version
+
+---
+
+# Prompt to Generate the Project (AI Builder)
+
+Build a Leave Planning Tracker Web Application.
+
+Requirements:
+
+Roles:
+Admin and User.
+
+Admin Features:
+Add team members
+Remove team members
+Set default password
+View all leaves
+
+User Features:
+Login
+Change password
+Add leave
+Edit leave
+Delete leave
+
+Calendar:
+Monthly calendar view showing team leaves.
+
+Database:
+Supabase PostgreSQL.
+
+Tables:
+
+users
+id
+name
+email
+role
+created_at
+
+leaves
+id
+user_id
+start_date
+end_date
+reason
+created_at
+
+Frontend:
+Next.js
+Tailwind CSS
+Framer Motion animations
+FullCalendar
+
+UI Design:
+Modern cinematic UI with gradients, colorful cards, smooth animations, and responsive layout.
+
+Deployment:
+Frontend on Vercel
+Backend using Supabase
+
+
+Note:
+•	Any user can view and filter all team leaves (by person, date range, leave type).

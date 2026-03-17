@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Leave Planning Tracker"
+version = "1.0.0"
+id = "artifacts/leave-tracker"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 22574
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/leave-tracker run dev"
+
+[services.env]
+PORT = "22574"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/leave-tracker", "run", "build"]
+publicDir = "artifacts/leave-tracker/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

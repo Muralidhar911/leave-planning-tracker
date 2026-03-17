@@ -1,0 +1,17 @@
+packages:
+  "framer-motion": "For cinematic page transitions and micro-interactions"
+  "date-fns": "For calendar grid generation and date formatting"
+  "react-hook-form": "For form state management without boilerplate"
+  "@hookform/resolvers": "For Zod form validation integration"
+  "clsx": "For conditional class merging"
+  "tailwind-merge": "For merging tailwind classes safely"
+  "lucide-react": "For beautiful consistent icons"
+
+images:
+  - path: "artifacts/leave-tracker/public/images/login-bg.png"
+    description: "Cinematic dark background with vibrant abstract electric cyan and deep purple light leaks and subtle particle noise, highly stylized, modern, dark mode, volumetric lighting"
+    aspect_ratio: "16:9"
+
+notes:
+  - "Assuming @workspace/api-client-react provides ready-to-use hooks like useLogin, useGetMe, etc."
+  - "App forces dark mode theme based on the requested cinematic aesthetic."

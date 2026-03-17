@@ -2,7 +2,7 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+Leave Planning Tracker — a full-stack team leave management web app.
 
 ## Stack
 
@@ -14,83 +14,93 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Database**: PostgreSQL + Drizzle ORM
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Frontend**: React + Vite, Tailwind CSS, Framer Motion, shadcn/ui
+- **Auth**: Express session (cookie-based)
+- **Password hashing**: bcryptjs
 
 ## Structure
 
 ```text
 artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+├── artifacts/
+│   ├── api-server/        # Express API (auth, users, leaves, stats)
+│   └── leave-tracker/     # React + Vite frontend
+├── lib/
+│   ├── api-spec/          # OpenAPI spec + Orval codegen config
+│   ├── api-client-react/  # Generated React Query hooks
+│   ├── api-zod/           # Generated Zod schemas
+│   └── db/                # Drizzle ORM schema + DB connection
+└── scripts/               # Utility scripts
 ```
 
-## TypeScript & Composite Projects
+## Database Schema
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+### users table
+- id (uuid, PK)
+- name (text)
+- email (text, unique)
+- password_hash (text)
+- role (text: 'admin' | 'user')
+- must_change_password (boolean, default true)
+- created_at (timestamptz)
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+### leaves table
+- id (uuid, PK)
+- user_id (uuid, FK → users.id)
+- start_date (date)
+- end_date (date)
+- reason (text)
+- created_at (timestamptz)
 
-## Root Scripts
+## Default Admin Account
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
+- Email: admin@company.com
+- Password: Admin@123
+- Role: admin
 
-## Packages
+## API Routes
 
-### `artifacts/api-server` (`@workspace/api-server`)
+All routes are under `/api`:
 
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
+### Auth
+- POST /auth/login
+- POST /auth/logout
+- GET /auth/me
+- POST /auth/change-password
+- PATCH /auth/update-profile
 
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
+### Users (admin only)
+- GET /users
+- POST /users
+- DELETE /users/:id
 
-### `lib/db` (`@workspace/db`)
+### Leaves
+- GET /leaves (own for users, all for admin)
+- GET /leaves/all (all team leaves for calendar)
+- POST /leaves
+- PATCH /leaves/:id
+- DELETE /leaves/:id
 
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
+### Stats
+- GET /stats (dashboard metrics)
 
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
+## User Roles
 
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
+- **Admin**: Can manage team members, view all leaves, add/remove users
+- **User**: Can plan leaves, view team calendar, manage own profile
 
-### `lib/api-spec` (`@workspace/api-spec`)
+## Features
 
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
+- Cinematic dark UI with indigo/purple/cyan gradient theme
+- Framer Motion animations on dashboard cards and page transitions
+- Team calendar with color-coded leaves per user
+- Dashboard stats: Total Members, Leaves Today, Upcoming, Monthly
+- Profile page with password change (mustChangePassword flow)
+- Session-based auth with cookie persistence
 
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
+## Running Locally
 
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+- Frontend: `pnpm --filter @workspace/leave-tracker run dev`
+- API Server: `pnpm --filter @workspace/api-server run dev`
+- DB push: `pnpm --filter @workspace/db run push`
+- Codegen: `pnpm --filter @workspace/api-spec run codegen`
