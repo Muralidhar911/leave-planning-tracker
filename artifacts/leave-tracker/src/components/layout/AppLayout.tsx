@@ -6,6 +6,7 @@ import {
   LayoutDashboard, 
   CalendarDays, 
   CalendarRange, 
+  BarChart3,
   Users, 
   UserCircle, 
   LogOut,
@@ -64,6 +65,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "My Leaves", path: "/leaves", icon: CalendarDays },
     { name: "Team Calendar", path: "/calendar", icon: CalendarRange },
+    { name: "Leave Insights", path: "/insights", icon: BarChart3 },
     ...(user.role === 'admin' ? [{ name: "Admin", path: "/admin", icon: Users }] : []),
     { name: "Profile", path: "/profile", icon: UserCircle },
   ];

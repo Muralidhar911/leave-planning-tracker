@@ -342,6 +342,45 @@ paths:
               schema:
                 $ref: "#/components/schemas/DashboardStats"
 
+  /insights:
+    get:
+      operationId: getInsights
+      tags: [leaves]
+      summary: Get filtered leave insights
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by user ID (omit for all users)
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [week, month, custom]
+          description: Predefined period filter
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Custom start date (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Custom end date (YYYY-MM-DD)
+      responses:
+        "200":
+          description: Leave insights
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightsResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -520,3 +559,60 @@ components:
         - leavesToday
         - upcomingLeaves
         - monthlyLeaves
+
+    InsightsLeave:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        userName:
+          type: string
+        userEmail:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        reason:
+          type: string
+        createdAt:
+          type: string
+        numberOfDays:
+          type: integer
+        isPast:
+          type: boolean
+        isUpcoming:
+          type: boolean
+      required:
+        - id
+        - userId
+        - userName
+        - userEmail
+        - startDate
+        - endDate
+        - reason
+        - createdAt
+        - numberOfDays
+        - isPast
+        - isUpcoming
+
+    InsightsResponse:
+      type: object
+      properties:
+        totalLeaves:
+          type: integer
+        upcomingLeaves:
+          type: integer
+        pastLeaves:
+          type: integer
+        leaves:
+          type: array
+          items:
+            $ref: "#/components/schemas/InsightsLeave"
+      required:
+        - totalLeaves
+        - upcomingLeaves
+        - pastLeaves
+        - leaves

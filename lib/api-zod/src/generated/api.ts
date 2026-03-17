@@ -191,3 +191,46 @@ export const GetStatsResponse = zod.object({
   upcomingLeaves: zod.number(),
   monthlyLeaves: zod.number(),
 });
+
+/**
+ * @summary Get filtered leave insights
+ */
+export const GetInsightsQueryParams = zod.object({
+  userId: zod.coerce
+    .string()
+    .optional()
+    .describe("Filter by user ID (omit for all users)"),
+  period: zod
+    .enum(["week", "month", "custom"])
+    .optional()
+    .describe("Predefined period filter"),
+  startDate: zod.coerce
+    .string()
+    .optional()
+    .describe("Custom start date (YYYY-MM-DD)"),
+  endDate: zod.coerce
+    .string()
+    .optional()
+    .describe("Custom end date (YYYY-MM-DD)"),
+});
+
+export const GetInsightsResponse = zod.object({
+  totalLeaves: zod.number(),
+  upcomingLeaves: zod.number(),
+  pastLeaves: zod.number(),
+  leaves: zod.array(
+    zod.object({
+      id: zod.string(),
+      userId: zod.string(),
+      userName: zod.string(),
+      userEmail: zod.string(),
+      startDate: zod.string(),
+      endDate: zod.string(),
+      reason: zod.string(),
+      createdAt: zod.string(),
+      numberOfDays: zod.number(),
+      isPast: zod.boolean(),
+      isUpcoming: zod.boolean(),
+    }),
+  ),
+});

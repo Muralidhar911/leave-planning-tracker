@@ -96,3 +96,52 @@ export interface DashboardStats {
   upcomingLeaves: number;
   monthlyLeaves: number;
 }
+
+export interface InsightsLeave {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  startDate: string;
+  endDate: string;
+  reason: string;
+  createdAt: string;
+  numberOfDays: number;
+  isPast: boolean;
+  isUpcoming: boolean;
+}
+
+export interface InsightsResponse {
+  totalLeaves: number;
+  upcomingLeaves: number;
+  pastLeaves: number;
+  leaves: InsightsLeave[];
+}
+
+export type GetInsightsParams = {
+  /**
+   * Filter by user ID (omit for all users)
+   */
+  userId?: string;
+  /**
+   * Predefined period filter
+   */
+  period?: GetInsightsPeriod;
+  /**
+   * Custom start date (YYYY-MM-DD)
+   */
+  startDate?: string;
+  /**
+   * Custom end date (YYYY-MM-DD)
+   */
+  endDate?: string;
+};
+
+export type GetInsightsPeriod =
+  (typeof GetInsightsPeriod)[keyof typeof GetInsightsPeriod];
+
+export const GetInsightsPeriod = {
+  week: "week",
+  month: "month",
+  custom: "custom",
+} as const;
