@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -63,11 +62,15 @@ export default function Login() {
         className="relative z-10 w-full max-w-md p-8 sm:p-12 rounded-3xl glass-panel shadow-[0_0_100px_rgba(168,85,247,0.15)] border-white/10"
       >
         <div className="flex flex-col items-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.5)] mb-6 transform -rotate-6 hover:rotate-0 transition-transform duration-500">
-            <Activity className="w-8 h-8 text-white" />
+          <div className="mb-6 transform -rotate-6 hover:rotate-0 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+            <img
+              src={`${import.meta.env.BASE_URL}leaveflow-logo.svg`}
+              alt="LeaveFlow Logo"
+              className="w-20 h-20"
+            />
           </div>
-          <h1 className="text-3xl font-display font-bold text-glow text-center">Leave Tracker</h1>
-          <p className="text-muted-foreground mt-2 text-center font-medium">Log in to manage your schedule</p>
+          <h1 className="text-3xl font-display font-bold text-glow text-center">LeaveFlow</h1>
+          <p className="text-muted-foreground mt-1 text-center font-medium text-sm">Automation Team Leave Planner</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

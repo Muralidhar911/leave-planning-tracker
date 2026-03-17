@@ -11,7 +11,7 @@ import {
   UserCircle, 
   LogOut,
   Loader2,
-  Activity
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -53,7 +53,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <Activity className="w-12 h-12 text-primary animate-pulse mb-4" />
+        <img
+          src={`${import.meta.env.BASE_URL}leaveflow-logo.svg`}
+          alt="LeaveFlow"
+          className="w-16 h-16 animate-pulse mb-4 drop-shadow-[0_0_20px_rgba(99,102,241,0.6)]"
+        />
         <p className="text-muted-foreground font-medium animate-pulse">Connecting to network...</p>
       </div>
     );
@@ -74,13 +78,18 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 border-r border-white/5 bg-black/20 backdrop-blur-xl flex flex-col relative z-20">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.4)]">
-            <Activity className="w-6 h-6 text-white" />
+        <div className="p-5 flex items-center gap-3">
+          <img
+            src={`${import.meta.env.BASE_URL}leaveflow-logo.svg`}
+            alt="LeaveFlow"
+            className="w-9 h-9 drop-shadow-[0_0_12px_rgba(6,182,212,0.5)]"
+          />
+          <div>
+            <span className="font-display font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 leading-none block">
+              LeaveFlow
+            </span>
+            <span className="text-[10px] text-muted-foreground leading-none">Automation Team</span>
           </div>
-          <span className="font-display font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">
-            LPT
-          </span>
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
