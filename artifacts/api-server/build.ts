@@ -6,40 +6,23 @@ import { rm, readFile } from "fs/promises";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Packages that should NOT be bundled (native addons, large optional deps, etc.)
+// These packages are bundled into the final output
 const allowlist = [
-  "@google/generative-ai",
-  "axios",
-  "connect-pg-simple",
   "cors",
   "date-fns",
   "drizzle-orm",
   "drizzle-zod",
   "express",
-  "express-rate-limit",
   "express-session",
-  "jsonwebtoken",
-  "memorystore",
-  "multer",
-  "nanoid",
-  "nodemailer",
-  "openai",
-  "passport",
-  "passport-local",
-  "pg",
-  "stripe",
-  "uuid",
-  "ws",
-  "xlsx",
+  "cookie-parser",
   "zod",
-  "zod-validation-error",
 ];
 
 async function buildAll() {
   const distDir = path.resolve(__dirname, "dist");
   await rm(distDir, { recursive: true, force: true });
 
-  console.log("building server...");
+  console.log("Building server...");
   const pkgPath = path.resolve(__dirname, "package.json");
   const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
   const allDeps = [
@@ -47,34 +30,34 @@ async function buildAll() {
     ...Object.keys(pkg.devDependencies || {}),
   ];
 
-  // Externalize: any dep NOT in the allowlist, AND any native/binary packages
-  const nativePackages = ["bcrypt", "bcryptjs"];
+  // Externalize native packages and anything NOT in allowlist
+  const nativePackages = ["bcrypt", "bcryptjs", "pg"];
   const externals = [
-    ...nativePackages,
-    ...allDeps.filter(
-      (dep) =>
-        !allowlist.includes(dep) &&
-        !(pkg.dependencies?.[dep]?.startsWith("workspace:")),
-    ),
+    ...new Set([
+      ...nativePackages,
+      ...allDeps.filter(
+        (dep) =>
+          !allowlist.includes(dep) &&
+          !(pkg.dependencies?.[dep]?.startsWith("workspace:")),
+      ),
+    ]),
   ];
 
   await esbuild({
     entryPoints: [path.resolve(__dirname, "src/index.ts")],
     platform: "node",
     bundle: true,
-    format: "cjs",
-    outfile: path.resolve(distDir, "index.cjs"),
-    // Do NOT hardcode NODE_ENV — let it be read at runtime from Render env vars
-    minify: false, // keep readable for debugging on Render
+    format: "cjs",           // CommonJS output
+    outfile: path.resolve(distDir, "index.js"),  // dist/index.js
     external: externals,
+    minify: false,           // keep readable for Render logs
     logLevel: "info",
   });
 
-  console.log("build complete → dist/index.cjs");
+  console.log("Build complete → dist/index.js");
 }
 
 buildAll().catch((err) => {
-  console.error(err);
+  console.error("Build failed:", err);
   process.exit(1);
 });
-
