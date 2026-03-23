@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import { db, usersTable } from "@workspace/db";
 import { eq, ne } from "drizzle-orm";
-import { requireAuth, requireAdmin } from "../lib/auth.js";
+import { requireAuth, requireAdmin } from "../lib/auth";
 
 const router: IRouter = Router();
 

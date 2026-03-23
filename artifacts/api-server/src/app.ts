@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import router from "./routes/index.js";
+import router from "./routes/index";
 
 const app: Express = express();
 

@@ -6,9 +6,7 @@ import { rm, readFile } from "fs/promises";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// server deps to bundle to reduce openat(2) syscalls
-// which helps cold start times without risking some
-// packages that are not bundle compatible
+// Packages that should NOT be bundled (native addons, large optional deps, etc.)
 const allowlist = [
   "@google/generative-ai",
   "axios",
@@ -48,11 +46,17 @@ async function buildAll() {
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.devDependencies || {}),
   ];
-  const externals = allDeps.filter(
-    (dep) =>
-      !allowlist.includes(dep) &&
-      !(pkg.dependencies?.[dep]?.startsWith("workspace:")),
-  );
+
+  // Externalize: any dep NOT in the allowlist, AND any native/binary packages
+  const nativePackages = ["bcrypt", "bcryptjs"];
+  const externals = [
+    ...nativePackages,
+    ...allDeps.filter(
+      (dep) =>
+        !allowlist.includes(dep) &&
+        !(pkg.dependencies?.[dep]?.startsWith("workspace:")),
+    ),
+  ];
 
   await esbuild({
     entryPoints: [path.resolve(__dirname, "src/index.ts")],
@@ -60,16 +64,17 @@ async function buildAll() {
     bundle: true,
     format: "cjs",
     outfile: path.resolve(distDir, "index.cjs"),
-    define: {
-      "process.env.NODE_ENV": '"production"',
-    },
-    minify: true,
+    // Do NOT hardcode NODE_ENV — let it be read at runtime from Render env vars
+    minify: false, // keep readable for debugging on Render
     external: externals,
     logLevel: "info",
   });
+
+  console.log("build complete → dist/index.cjs");
 }
 
 buildAll().catch((err) => {
   console.error(err);
   process.exit(1);
 });
+
