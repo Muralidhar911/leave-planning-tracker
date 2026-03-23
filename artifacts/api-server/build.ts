@@ -6,15 +6,18 @@ import { rm, readFile } from "fs/promises";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// These packages are bundled into the final output
-const allowlist = [
+// All packages in this list get BUNDLED into dist/index.js
+// Both pg and bcryptjs are pure JavaScript — safe to bundle
+const bundled = [
+  "bcryptjs",
+  "cookie-parser",
   "cors",
   "date-fns",
   "drizzle-orm",
   "drizzle-zod",
   "express",
   "express-session",
-  "cookie-parser",
+  "pg",
   "zod",
 ];
 
@@ -30,27 +33,24 @@ async function buildAll() {
     ...Object.keys(pkg.devDependencies || {}),
   ];
 
-  // Externalize native packages and anything NOT in allowlist
-  const nativePackages = ["bcrypt", "bcryptjs", "pg"];
-  const externals = [
-    ...new Set([
-      ...nativePackages,
-      ...allDeps.filter(
-        (dep) =>
-          !allowlist.includes(dep) &&
-          !(pkg.dependencies?.[dep]?.startsWith("workspace:")),
-      ),
-    ]),
-  ];
+  // Only externalize packages that are NOT in bundled list
+  // AND are not workspace packages (workspace packages MUST be bundled)
+  const externals = allDeps.filter(
+    (dep) =>
+      !bundled.includes(dep) &&
+      !(pkg.dependencies?.[dep]?.startsWith("workspace:")),
+  );
+
+  console.log("Externalized (NOT bundled):", externals);
 
   await esbuild({
     entryPoints: [path.resolve(__dirname, "src/index.ts")],
     platform: "node",
     bundle: true,
-    format: "cjs",           // CommonJS output
-    outfile: path.resolve(distDir, "index.js"),  // dist/index.js
+    format: "cjs",
+    outfile: path.resolve(distDir, "index.js"),
     external: externals,
-    minify: false,           // keep readable for Render logs
+    minify: false,
     logLevel: "info",
   });
 
@@ -61,3 +61,4 @@ buildAll().catch((err) => {
   console.error("Build failed:", err);
   process.exit(1);
 });
+
