@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm install --ignore-scripts && pnpm --filter @workspace/leave-tracker exec vite build --config vite.config.prod.ts",
+  "buildCommand": "pnpm install --ignore-scripts && pnpm --filter @workspace/leave-tracker run build:prod",
   "outputDirectory": "artifacts/leave-tracker/dist/public",
   "installCommand": "pnpm install --ignore-scripts",
   "framework": null,
