@@ -22,7 +22,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { data: user, isLoading, error } = useGetMe({ query: { retry: false } });
+  const { data: user, isLoading, error } = useGetMe({ query: { retry: false } as never });
   
   const logoutMutation = useLogout({
     mutation: {
@@ -38,6 +38,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       setLocation("/login");
     }
   }, [isLoading, error, setLocation]);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setLocation("/login");
+    }
+  }, [isLoading, user, setLocation]);
 
   useEffect(() => {
     if (user?.mustChangePassword && location !== "/profile") {
@@ -63,7 +69,13 @@ export function AppLayout({ children }: AppLayoutProps) {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <p className="text-muted-foreground">Redirecting to login...</p>
+      </div>
+    );
+  }
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -130,7 +142,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
           </div>
           <button
-            onClick={() => logoutMutation.mutate({})}
+            onClick={() => logoutMutation.mutate(undefined as never)}
             className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm text-muted-foreground hover:bg-white/5 hover:text-destructive transition-colors group"
           >
             {logoutMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />}

@@ -31,6 +31,24 @@ function resolveUrl(input: RequestInfo | URL): string {
   return input.url;
 }
 
+// Prepend the backend base URL for relative paths (e.g. /api/auth/login)
+// VITE_API_URL should be set to https://your-render-url.onrender.com
+declare global { interface ImportMeta { env: Record<string, string | undefined> } }
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || "";
+
+function applyBaseUrl(input: RequestInfo | URL): RequestInfo | URL {
+  if (!API_BASE) return input;
+  const url = resolveUrl(input);
+  // Only prepend for relative URLs that start with /
+  if (url.startsWith("/")) {
+    const fullUrl = `${API_BASE.replace(/\/$/, "")}${url}`;
+    if (typeof input === "string") return fullUrl;
+    if (isUrl(input)) return new URL(fullUrl);
+    return new Request(fullUrl, input as Request);
+  }
+  return input;
+}
+
 function mergeHeaders(...sources: Array<HeadersInit | undefined>): Headers {
   const headers = new Headers();
 
@@ -277,13 +295,15 @@ export async function customFetch<T = unknown>(
 ): Promise<T> {
   const { responseType = "auto", headers: headersInit, ...init } = options;
 
-  const method = resolveMethod(input, init.method);
+  // Apply backend base URL for relative paths, add credentials for cross-origin sessions
+  const resolvedInput = applyBaseUrl(input);
+  const method = resolveMethod(resolvedInput, init.method);
 
   if (init.body != null && (method === "GET" || method === "HEAD")) {
     throw new TypeError(`customFetch: ${method} requests cannot have a body.`);
   }
 
-  const headers = mergeHeaders(isRequest(input) ? input.headers : undefined, headersInit);
+  const headers = mergeHeaders(isRequest(resolvedInput) ? resolvedInput.headers : undefined, headersInit);
 
   if (
     typeof init.body === "string" &&
@@ -297,9 +317,9 @@ export async function customFetch<T = unknown>(
     headers.set("accept", DEFAULT_JSON_ACCEPT);
   }
 
-  const requestInfo = { method, url: resolveUrl(input) };
+  const requestInfo = { method, url: resolveUrl(resolvedInput) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  const response = await fetch(resolvedInput, { ...init, method, headers, credentials: "include" });
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
