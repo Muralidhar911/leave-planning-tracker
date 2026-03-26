@@ -1,9 +1,12 @@
 {
-  "buildCommand": "pnpm install --ignore-scripts && pnpm --filter @workspace/leave-tracker run build:prod",
+  "buildCommand": "pnpm install && pnpm --filter @workspace/leave-tracker run build:prod",
   "outputDirectory": "artifacts/leave-tracker/dist/public",
-  "installCommand": "pnpm install --ignore-scripts",
+  "installCommand": "pnpm install",
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
