@@ -31,10 +31,11 @@ function resolveUrl(input: RequestInfo | URL): string {
   return input.url;
 }
 
-// Prepend the backend base URL for relative paths (e.g. /api/auth/login)
-// VITE_API_URL should be set to https://your-render-url.onrender.com
+// Backend base URL — VITE_API_URL env var takes priority, Render URL is the fallback
 declare global { interface ImportMeta { env: Record<string, string | undefined> } }
-const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || "";
+const API_BASE: string =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
+  "https://leave-planning-tracker.onrender.com";
 
 function applyBaseUrl(input: RequestInfo | URL): RequestInfo | URL {
   if (!API_BASE) return input;
