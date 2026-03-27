@@ -22,7 +22,9 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { data: user, isLoading, error } = useGetMe({ query: { retry: false } as never });
+  const { data: user, isLoading, error } = useGetMe({
+    query: { retry: false, staleTime: 0, gcTime: 0 } as never,
+  });
   
   const logoutMutation = useLogout({
     mutation: {

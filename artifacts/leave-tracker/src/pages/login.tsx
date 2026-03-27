@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { useLogin } from "@workspace/api-client-react";
+import { useLogin, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Lock, Mail } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -18,6 +19,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -28,7 +30,11 @@ export default function Login() {
 
   const loginMutation = useLogin({
     mutation: {
-      onSuccess: () => {
+      onSuccess: async () => {
+        // Clear stale cache so AppLayout's useGetMe refetches with the new session cookie
+        // Without this, the cached 401 error causes instant redirect back to /login
+        await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+        queryClient.clear();
         setLocation("/dashboard");
       },
       onError: (error: any) => {
@@ -40,6 +46,7 @@ export default function Login() {
       },
     },
   });
+
 
   const onSubmit = (data: LoginForm) => {
     loginMutation.mutate({ data });
