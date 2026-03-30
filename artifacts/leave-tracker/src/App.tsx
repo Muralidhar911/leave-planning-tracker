@@ -9,6 +9,7 @@ import Dashboard from "@/pages/dashboard";
 import Leaves from "@/pages/leaves";
 import Calendar from "@/pages/calendar";
 import Insights from "@/pages/insights";
+import Holidays from "@/pages/holidays";
 import Admin from "@/pages/admin";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/leaves" component={Leaves} />
       <Route path="/calendar" component={Calendar} />
       <Route path="/insights" component={Insights} />
+      <Route path="/holidays" component={Holidays} />
       <Route path="/admin" component={Admin} />
       <Route path="/profile" component={Profile} />
       <Route component={NotFound} />

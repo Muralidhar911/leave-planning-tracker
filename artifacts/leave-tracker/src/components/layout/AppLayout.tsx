@@ -12,6 +12,7 @@ import {
   LogOut,
   Loader2,
   AlertCircle,
+  PartyPopper,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -84,6 +85,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     { name: "My Leaves", path: "/leaves", icon: CalendarDays },
     { name: "Team Calendar", path: "/calendar", icon: CalendarRange },
     { name: "Leave Insights", path: "/insights", icon: BarChart3 },
+    { name: "Holiday Dashboard", path: "/holidays", icon: PartyPopper },
     ...(user.role === 'admin' ? [{ name: "Admin", path: "/admin", icon: Users }] : []),
     { name: "Profile", path: "/profile", icon: UserCircle },
   ];
