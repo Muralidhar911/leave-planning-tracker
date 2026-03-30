@@ -3,7 +3,7 @@ import { useListAllLeaves } from "@workspace/api-client-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { getUserColor } from "@/lib/utils";
 import { 
   format, addMonths, subMonths, startOfMonth, endOfMonth, 
@@ -13,11 +13,14 @@ import {
 import { cn } from "@/lib/utils";
 
 export default function Calendar() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const today = new Date();
+  const [currentDate, setCurrentDate] = useState(today);
   const { data: leaves } = useListAllLeaves();
 
+  const isCurrentMonth = isSameMonth(currentDate, today);
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+  const goToToday = () => setCurrentDate(new Date());
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
@@ -38,16 +41,24 @@ export default function Calendar() {
           <p className="text-muted-foreground mt-1">See when your team is away</p>
         </div>
         
-        <div className="flex items-center gap-4 bg-card/60 border border-white/10 rounded-xl p-1 backdrop-blur-md">
-          <Button variant="ghost" size="icon" onClick={prevMonth}>
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <span className="w-32 text-center font-display font-semibold text-foreground">
-            {format(currentDate, "MMMM yyyy")}
-          </span>
-          <Button variant="ghost" size="icon" onClick={nextMonth}>
-            <ChevronRight className="w-5 h-5" />
-          </Button>
+        <div className="flex items-center gap-2">
+          {!isCurrentMonth && (
+            <Button variant="ghost" size="sm" onClick={goToToday} className="text-xs h-9 px-3 text-primary gap-1">
+              <RotateCcw className="w-3 h-3" />
+              Today
+            </Button>
+          )}
+          <div className="flex items-center gap-4 bg-card/60 border border-white/10 rounded-xl p-1 backdrop-blur-md">
+            <Button variant="ghost" size="icon" onClick={prevMonth}>
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <span className="w-32 text-center font-display font-semibold text-foreground">
+              {format(currentDate, "MMMM yyyy")}
+            </span>
+            <Button variant="ghost" size="icon" onClick={nextMonth}>
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
