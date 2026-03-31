@@ -6,9 +6,9 @@ import { requireAuth } from "../lib/auth";
 const router: IRouter = Router();
 
 router.get("/leaves", requireAuth, async (req, res): Promise<void> => {
-  const isAdmin = req.session.role === "admin";
-
-  const query = db
+  // Always filter by logged-in user — even admins should only see their own leaves here.
+  // Use GET /leaves/all for the full team view (team calendar, insights).
+  const leaves = await db
     .select({
       id: leavesTable.id,
       userId: leavesTable.userId,
@@ -20,16 +20,9 @@ router.get("/leaves", requireAuth, async (req, res): Promise<void> => {
       userEmail: usersTable.email,
     })
     .from(leavesTable)
-    .innerJoin(usersTable, eq(leavesTable.userId, usersTable.id));
-
-  let leaves;
-  if (isAdmin) {
-    leaves = await query.orderBy(leavesTable.startDate);
-  } else {
-    leaves = await query
-      .where(eq(leavesTable.userId, req.session.userId!))
-      .orderBy(leavesTable.startDate);
-  }
+    .innerJoin(usersTable, eq(leavesTable.userId, usersTable.id))
+    .where(eq(leavesTable.userId, req.session.userId!))
+    .orderBy(leavesTable.startDate);
 
   res.json(
     leaves.map((l) => ({
@@ -38,6 +31,7 @@ router.get("/leaves", requireAuth, async (req, res): Promise<void> => {
     }))
   );
 });
+
 
 router.get("/leaves/all", requireAuth, async (_req, res): Promise<void> => {
   const leaves = await db
