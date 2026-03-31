@@ -47,8 +47,10 @@ function calculateDays(start: string, end: string): number {
 
 router.get("/insights", requireAuth, async (req, res): Promise<void> => {
   const { userId, period, startDate, endDate } = req.query as Record<string, string | undefined>;
+  console.log(`[insights] query → userId=${userId} period=${period} startDate=${startDate} endDate=${endDate}`);
 
   const dateRange = getDateRange(period, startDate, endDate);
+  console.log(`[insights] dateRange resolved →`, dateRange);
   const today = new Date().toISOString().split("T")[0];
 
   const conditions = [];
@@ -58,8 +60,13 @@ router.get("/insights", requireAuth, async (req, res): Promise<void> => {
   }
 
   if (dateRange) {
-    conditions.push(gte(leavesTable.startDate, dateRange.from));
+    // Correct overlap condition:
+    //   leave.startDate <= rangeEnd  (leave starts before or on the range end)
+    //   leave.endDate   >= rangeFrom (leave ends on or after the range start)
+    // This captures: fully inside, starts before & overlaps, ends after & overlaps.
     conditions.push(lte(leavesTable.startDate, dateRange.to));
+    conditions.push(gte(leavesTable.endDate, dateRange.from));
+    console.log(`[insights] date filter: ${dateRange.from} → ${dateRange.to} (overlap condition)`);
   }
 
   const query = db

@@ -38,6 +38,8 @@ export default function Insights() {
     if (userId !== "all") params.userId = userId;
 
     if (period === "custom") {
+      // IMPORTANT: must send period=custom so backend activates custom date branch
+      params.period = "custom";
       if (customApplied?.start) params.startDate = customApplied.start;
       if (customApplied?.end) params.endDate = customApplied.end;
     } else {
@@ -47,13 +49,14 @@ export default function Insights() {
     return params;
   }, [userId, period, customApplied]);
 
+
   // Reset calendar to current month whenever the active filter changes
   useEffect(() => {
     setCurrentDate(new Date());
   }, [fetchParams]);
 
   const { data: insights, isLoading } = useGetInsights(fetchParams as any, {
-    query: { retry: false },
+    query: { retry: false } as any,
   });
 
   const handleApplyCustom = () => {
